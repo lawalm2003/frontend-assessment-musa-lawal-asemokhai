@@ -5,7 +5,6 @@ import SearchBar from '@/components/SearchBar';
 import MovieGrid from '@/components/MovieGrid';
 import Pagination from '@/components/Pagination';
 import { useSearchMovies } from '@/hooks/useTmdb';
-import Loading from '@/app/search/loading';
 
 function SearchResults({ query, page }: { query: string; page: number }) {
   const { data, isLoading } = useSearchMovies(query, page);
@@ -19,7 +18,13 @@ function SearchResults({ query, page }: { query: string; page: number }) {
   }
 
   if (isLoading) {
-    return <Loading />;
+    return (
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-pulse'>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className='aspect-[2/3] bg-neutral-800 rounded-xl' />
+        ))}
+      </div>
+    );
   }
 
   if (!data || data.results.length === 0) {
@@ -51,6 +56,8 @@ function SearchResults({ query, page }: { query: string; page: number }) {
 interface Props {
   query: string;
   page: number;
+  genre: string;
+  rating: string;
 }
 
 export default function SearchClient({ query, page }: Props) {
@@ -59,13 +66,11 @@ export default function SearchClient({ query, page }: Props) {
       <h1 className='text-2xl font-bold text-neutral-100 mb-6 tracking-tight'>
         Search Movies
       </h1>
-
       <div className='mb-8 max-w-lg'>
         <Suspense>
           <SearchBar defaultValue={query} placeholder='Search by title...' />
         </Suspense>
       </div>
-
       <SearchResults query={query} page={page} />
     </div>
   );

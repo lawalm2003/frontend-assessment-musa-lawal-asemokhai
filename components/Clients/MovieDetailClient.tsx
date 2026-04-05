@@ -1,27 +1,42 @@
 'use client';
 
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
-
+import Link from 'next/link';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import {
   useMovieDetail,
   useMovieCredits,
   useSimilarMovies,
 } from '@/hooks/useTmdb';
-
 import { getImageUrl } from '@/lib/tmdb';
-
-import MovieGrid from '@/components/MovieGrid';
 import { formatCurrency, formatRating, formatRuntime } from '@/lib/utilities';
+import MovieGrid from '@/components/MovieGrid';
 import MovieDetailLoading from '@/app/movies/[id]/loading';
+import { MovieDetail, MovieCredits, MovieListResponse } from '@/types/movie';
 
-export default function MovieDetailClient({ id }: { id: number }) {
-  const { data: movie, isLoading } = useMovieDetail(id);
-  const { data: credits } = useMovieCredits(id);
-  const { data: similar } = useSimilarMovies(id);
+interface Props {
+  id: number;
+  initialMovie?: MovieDetail;
+  initialCredits?: MovieCredits;
+  initialSimilar?: MovieListResponse;
+}
+
+export default function MovieDetailClient({
+  id,
+  initialMovie,
+  initialCredits,
+  initialSimilar,
+}: Props) {
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from');
+
+  const router = useRouter();
+  const { data: movie, isLoading } = useMovieDetail(id, initialMovie);
+  const { data: credits } = useMovieCredits(id, initialCredits);
+  const { data: similar } = useSimilarMovies(id, initialSimilar);
 
   if (isLoading) return <MovieDetailLoading />;
-  if (!movie) notFound();
+  if (!movie) return notFound();
 
   const backdropUrl = getImageUrl(movie.backdrop_path, 'w780');
   const posterUrl = getImageUrl(movie.poster_path, 'w342');
@@ -30,8 +45,17 @@ export default function MovieDetailClient({ id }: { id: number }) {
     : null;
   const topCast = credits?.cast.slice(0, 10) ?? [];
 
+  const routeMap: Record<string, string> = {
+    '/': 'Home',
+    '/popular': 'Popular',
+    '/top-rated': 'Top Rated',
+    '/now-playing': 'Now Playing',
+  };
+
+  const label = routeMap[from || '/'] || 'Home';
+
   return (
-    <div className='min-h-screen'>
+    <div className='min-h-screen mt-1'>
       {/* Backdrop */}
       {backdropUrl && (
         <div className='relative w-full h-72 md:h-96 overflow-hidden'>
@@ -44,10 +68,46 @@ export default function MovieDetailClient({ id }: { id: number }) {
             className='object-cover object-top'
           />
           <div className='absolute inset-0 bg-gradient-to-b from-transparent via-neutral-950/60 to-neutral-950' />
+
+          {/* Breadcrumb — sits over backdrop */}
+          <nav
+            aria-label='Breadcrumb'
+            className='absolute top-4 left-4 z-10 flex items-center gap-1.5 text-sm text-white/70'
+          >
+            <button
+              onClick={() => router.back()}
+              className='hover:text-white transition-colors'
+            >
+              {label}
+            </button>
+            <span className='text-white/40'>/</span>
+            <span className='text-white font-medium line-clamp-1 max-w-[200px]'>
+              {movie.title}
+            </span>
+          </nav>
         </div>
       )}
 
       <div className='max-w-screen-xl mx-auto px-6 py-8'>
+        {/* Breadcrumb fallback — when no backdrop */}
+        {!backdropUrl && (
+          <nav
+            aria-label='Breadcrumb'
+            className='flex items-center gap-1.5 text-sm text-neutral-500 mb-6'
+          >
+            <button
+              onClick={() => router.back()}
+              className='hover:text-white transition-colors'
+            >
+              {label}
+            </button>
+            <span className='text-white/40'>/</span>
+            <span className='text-white font-medium line-clamp-1 max-w-[200px]'>
+              {movie.title}
+            </span>
+          </nav>
+        )}
+
         <div className='flex flex-col md:flex-row gap-8 -mt-24 relative z-10'>
           {/* Poster */}
           <div className='shrink-0 self-start'>
@@ -100,7 +160,6 @@ export default function MovieDetailClient({ id }: { id: number }) {
               </span>
             </div>
 
-            {/* Genres */}
             <div className='flex flex-wrap gap-2 mb-5'>
               {movie.genres.map((genre) => (
                 <span
@@ -116,7 +175,6 @@ export default function MovieDetailClient({ id }: { id: number }) {
               {movie.overview}
             </p>
 
-            {/* Stats */}
             <div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
               {[
                 { label: 'Status', value: movie.status },
@@ -189,7 +247,6 @@ export default function MovieDetailClient({ id }: { id: number }) {
           </section>
         )}
 
-        {/* Similar Movies */}
         {similar && similar.results.length > 0 && (
           <div className='mt-12'>
             <MovieGrid

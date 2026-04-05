@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import PopularClient from '@/components/Clients/PopularClient';
+import { getPopularMovies } from '@/services/tmdb.server';
 
 export const metadata: Metadata = {
   title: 'Popular Movies',
@@ -12,8 +14,15 @@ interface Props {
 }
 
 export default async function PopularPage({ searchParams }: Props) {
-  const { page } = await searchParams;
-  const pageNumber = Number(page ?? 1);
+  const page = Number((await searchParams).page ?? 1);
 
-  return <PopularClient page={pageNumber} />;
+  // SSR prefetch — data is fetched on the server, passed as initialData
+  // to React Query so the page is never blank on first load
+  const initialData = await getPopularMovies(page);
+
+  return (
+    <Suspense>
+      <PopularClient page={page} initialData={initialData} />
+    </Suspense>
+  );
 }

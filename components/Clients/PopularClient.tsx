@@ -1,17 +1,24 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { usePopularMovies } from '@/hooks/useTmdb';
 import { getImageUrl } from '@/lib/tmdb';
 import { formatRating } from '@/lib/utilities';
-import Image from 'next/image';
-import Link from 'next/link';
-import React from 'react';
 import MovieGrid from '../MovieGrid';
 import Pagination from '../Pagination';
 import Loading from '@/app/movies/popular/loading';
+import { MovieListResponse } from '@/types/movie';
+import { usePathname } from 'next/navigation';
 
-export default function PopularClient({ page }: { page: number }) {
-  const { data, isLoading } = usePopularMovies();
+interface Props {
+  page: number;
+  initialData?: MovieListResponse;
+}
+
+export default function PopularClient({ page, initialData }: Props) {
+  const pathname = usePathname();
+  const { data, isLoading } = usePopularMovies(page, initialData);
 
   if (isLoading) return <Loading />;
   if (!data) return null;
@@ -19,9 +26,10 @@ export default function PopularClient({ page }: { page: number }) {
   const topThree = data.results.slice(0, 3);
   const rest = data.results.slice(3);
 
+  const cleanPath = pathname.replace(/^\/movies/, '') || '/';
+
   return (
     <div className='min-h-screen'>
-      {/* Page header */}
       <div className='border-b border-neutral-800 bg-neutral-950'>
         <div className='max-w-screen-xl mx-auto px-6 py-10'>
           <div className='flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4'>
@@ -44,7 +52,6 @@ export default function PopularClient({ page }: { page: number }) {
       </div>
 
       <div className='max-w-screen-xl mx-auto px-6 py-10'>
-        {/* Top 3 spotlight — only on page 1 */}
         {page === 1 && topThree.length > 0 && (
           <div className='mb-12'>
             <h2 className='text-xs font-bold uppercase tracking-widest text-neutral-500 mb-5'>
@@ -59,7 +66,7 @@ export default function PopularClient({ page }: { page: number }) {
                 return (
                   <Link
                     key={movie.id}
-                    href={`/movies/${movie.id}`}
+                    href={`/movies/${movie.id}?from=${cleanPath}`}
                     className='group relative rounded-2xl overflow-hidden aspect-video bg-neutral-800 block'
                   >
                     {backdropUrl && (
@@ -73,7 +80,6 @@ export default function PopularClient({ page }: { page: number }) {
                       />
                     )}
                     <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent' />
-                    {/* Rank badge */}
                     <div className='absolute top-3 left-3 w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white text-sm font-black'>
                       {i + 1}
                     </div>
@@ -99,7 +105,6 @@ export default function PopularClient({ page }: { page: number }) {
           </div>
         )}
 
-        {/* Full grid */}
         <MovieGrid
           movies={page === 1 ? rest : data.results}
           title={page === 1 ? 'All Popular Movies' : `Page ${page}`}

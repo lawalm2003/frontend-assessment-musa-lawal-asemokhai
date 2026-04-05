@@ -1,4 +1,3 @@
-//hooks/useTmdb.ts
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
@@ -11,79 +10,96 @@ import {
   getMovieCredits,
   searchMovies,
   getSimilarMovies,
+  discoverMovies,
+  getGenres,
 } from '@/services/tmdb.services';
+import { MovieListResponse, MovieDetail, MovieCredits } from '@/types/movie';
 
 export const tmdbKeys = {
   all: ['tmdb'] as const,
-
   trending: (timeWindow: 'day' | 'week') =>
     [...tmdbKeys.all, 'trending', timeWindow] as const,
-
   popular: (page: number) => [...tmdbKeys.all, 'popular', page] as const,
-
   nowPlaying: (page: number) => [...tmdbKeys.all, 'now-playing', page] as const,
-
   topRated: (page: number) => [...tmdbKeys.all, 'top-rated', page] as const,
-
   detail: (id: number) => [...tmdbKeys.all, 'detail', id] as const,
-
   credits: (id: number) => [...tmdbKeys.all, 'credits', id] as const,
-
   similar: (id: number) => [...tmdbKeys.all, 'similar', id] as const,
-
   search: (query: string, page: number) =>
     [...tmdbKeys.all, 'search', query, page] as const,
+  discover: (genreId: string, page: number) =>
+    [...tmdbKeys.all, 'discover', genreId, page] as const,
+  genres: () => [...tmdbKeys.all, 'genres'] as const,
 };
 
-export function useTrendingMovies(timeWindow: 'day' | 'week' = 'week') {
+export function useTrendingMovies(
+  timeWindow: 'day' | 'week' = 'week',
+  initialData?: MovieListResponse,
+) {
   return useQuery({
     queryKey: tmdbKeys.trending(timeWindow),
     queryFn: () => getTrendingMovies(timeWindow),
+    initialData,
   });
 }
 
-export function usePopularMovies(page: number = 1) {
+export function usePopularMovies(
+  page: number = 1,
+  initialData?: MovieListResponse,
+) {
   return useQuery({
     queryKey: tmdbKeys.popular(page),
     queryFn: () => getPopularMovies(page),
+    initialData,
   });
 }
 
-export function useNowPlayingMovies(page: number = 1) {
+export function useNowPlayingMovies(
+  page: number = 1,
+  initialData?: MovieListResponse,
+) {
   return useQuery({
     queryKey: tmdbKeys.nowPlaying(page),
     queryFn: () => getNowPlayingMovies(page),
+    initialData,
   });
 }
 
-export function useTopRatedMovies(page: number = 1) {
+export function useTopRatedMovies(
+  page: number = 1,
+  initialData?: MovieListResponse,
+) {
   return useQuery({
     queryKey: tmdbKeys.topRated(page),
     queryFn: () => getTopRatedMovies(page),
+    initialData,
   });
 }
 
-export function useMovieDetail(id: number) {
+export function useMovieDetail(id: number, initialData?: MovieDetail) {
   return useQuery({
     queryKey: tmdbKeys.detail(id),
     queryFn: () => getMovieDetail(id),
-    enabled: !!id, // prevents invalid calls
+    enabled: !!id,
+    initialData,
   });
 }
 
-export function useMovieCredits(id: number) {
+export function useMovieCredits(id: number, initialData?: MovieCredits) {
   return useQuery({
     queryKey: tmdbKeys.credits(id),
     queryFn: () => getMovieCredits(id),
     enabled: !!id,
+    initialData,
   });
 }
 
-export function useSimilarMovies(id: number) {
+export function useSimilarMovies(id: number, initialData?: MovieListResponse) {
   return useQuery({
     queryKey: tmdbKeys.similar(id),
     queryFn: () => getSimilarMovies(id),
     enabled: !!id,
+    initialData,
   });
 }
 
@@ -92,5 +108,21 @@ export function useSearchMovies(query: string, page: number = 1) {
     queryKey: tmdbKeys.search(query, page),
     queryFn: () => searchMovies(query, page),
     enabled: !!query.trim(),
+  });
+}
+
+export function useDiscoverMovies(genreId: string, page: number = 1) {
+  return useQuery({
+    queryKey: tmdbKeys.discover(genreId, page),
+    queryFn: () => discoverMovies(genreId, page),
+    enabled: !!genreId,
+  });
+}
+
+export function useGenres() {
+  return useQuery({
+    queryKey: tmdbKeys.genres(),
+    queryFn: getGenres,
+    staleTime: Infinity,
   });
 }

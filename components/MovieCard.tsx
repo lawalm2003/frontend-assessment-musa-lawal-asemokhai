@@ -3,20 +3,25 @@ import Link from 'next/link';
 import type { Movie } from '@/types/movie';
 import { getImageUrl } from '@/lib/tmdb';
 import { formatRating } from '@/lib/utilities';
+import { usePathname } from 'next/navigation';
 
 interface MovieCardProps {
   movie: Movie;
 }
 
 export default function MovieCard({ movie }: MovieCardProps) {
+  const pathname = usePathname();
+
   const posterUrl = getImageUrl(movie.poster_path, 'w342');
   const releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : null;
 
+  // remove "/movies" prefix
+  const cleanPath = pathname.replace(/^\/movies/, '') || '/';
   return (
     <Link
-      href={`/movies/${movie.id}`}
+      href={`/movies/${movie.id}?from=${cleanPath}`}
       className='group block rounded-xl overflow-hidden bg-neutral-900 hover:-translate-y-1 transition-transform duration-200'
     >
       <div className='relative aspect-[2/3] bg-neutral-800 overflow-hidden'>

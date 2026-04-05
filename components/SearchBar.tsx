@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface SearchBarProps {
   defaultValue?: string;
@@ -14,27 +14,45 @@ export default function SearchBar({
 }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [value, setValue] = useState(defaultValue);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
+  // Keep input in sync if defaultValue changes (e.g. browser back/forward)
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
+
+  const pushSearch = useCallback(
+    (query: string) => {
       const params = new URLSearchParams(searchParams.toString());
-
-      if (value) {
-        params.set('q', value);
+      if (query.trim()) {
+        params.set('q', query);
         params.delete('page');
       } else {
         params.delete('q');
         params.delete('page');
       }
-
-      startTransition(() => {
-        router.push(`/search?${params.toString()}`);
-      });
+      router.push(`/search?${params.toString()}`);
     },
     [router, searchParams],
   );
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setValue(query);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      pushSearch(query);
+    }, 300);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   return (
     <div className='relative flex items-center w-full max-w-sm'>
@@ -55,15 +73,12 @@ export default function SearchBar({
       </span>
       <input
         type='search'
-        defaultValue={defaultValue}
+        value={value}
         onChange={handleChange}
         placeholder={placeholder}
         aria-label='Search movies'
-        className='w-full h-10 pl-9 pr-10 bg-neutral-800 border border-neutral-700 rounded-full text-sm text-neutral-100 placeholder:text-neutral-500 outline-none focus:border-red-600 focus:bg-neutral-700 transition-colors'
+        className='w-full h-10 pl-9 pr-4 bg-neutral-800 border border-neutral-700 rounded-full text-sm text-neutral-100 placeholder:text-neutral-500 outline-none focus:border-red-600 focus:bg-neutral-700 transition-colors'
       />
-      {isPending && (
-        <span className='absolute right-3.5 w-4 h-4 border-2 border-neutral-600 border-t-red-600 rounded-full animate-spin' />
-      )}
     </div>
   );
 }

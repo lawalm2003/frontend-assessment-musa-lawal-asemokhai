@@ -9,9 +9,19 @@ import React from 'react';
 import MovieGrid from '../MovieGrid';
 import Pagination from '../Pagination';
 import Loading from '@/app/movies/top-rated/loading';
+import { MovieListResponse } from '@/types/movie';
+import { usePathname } from 'next/navigation';
 
-export default function TopRatedClient({ page }: { page: number }) {
-  const { data, isLoading } = useTopRatedMovies();
+interface Props {
+  page: number;
+  initialData?: MovieListResponse;
+}
+
+export default function TopRatedClient({ page, initialData }: Props) {
+  const pathname = usePathname();
+  const cleanPath = pathname.replace(/^\/movies/, '') || '/';
+
+  const { data, isLoading } = useTopRatedMovies(page, initialData);
 
   if (isLoading) return <Loading />;
   if (!data) return null;
@@ -53,7 +63,7 @@ export default function TopRatedClient({ page }: { page: number }) {
               #1 of all time
             </h2>
             <Link
-              href={`/movies/${topMovie.id}`}
+              href={`/movies/${topMovie.id}?from=${cleanPath}`}
               className='group relative flex flex-col sm:flex-row gap-6 bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden hover:border-yellow-500/50 transition-colors'
             >
               {/* Backdrop strip */}
@@ -135,7 +145,7 @@ export default function TopRatedClient({ page }: { page: number }) {
               return (
                 <Link
                   key={movie.id}
-                  href={`/movies/${movie.id}`}
+                  href={`/movies/${movie.id}?from=${cleanPath}`}
                   className='group flex items-center gap-4 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl px-4 py-3 transition-colors'
                 >
                   {/* Rank */}

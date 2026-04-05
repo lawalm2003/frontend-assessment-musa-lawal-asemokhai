@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import TopRatedClient from '@/components/Clients/TopRatedClient';
+import { getTopRatedMovies } from '@/services/tmdb.server';
 
 export const metadata: Metadata = {
   title: 'Top Rated Movies',
@@ -13,6 +15,11 @@ interface Props {
 
 export default async function TopRatedPage({ searchParams }: Props) {
   const page = Number((await searchParams).page ?? 1);
+  const initialData = await getTopRatedMovies(page);
 
-  return <TopRatedClient page={page} />;
+  return (
+    <Suspense>
+      <TopRatedClient page={page} initialData={initialData} />
+    </Suspense>
+  );
 }

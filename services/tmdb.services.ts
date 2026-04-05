@@ -42,6 +42,26 @@ export async function searchMovies(
   );
 }
 
+export async function discoverMovies(
+  genreId: string,
+  page: number = 1,
+): Promise<MovieListResponse> {
+  const params = new URLSearchParams({
+    with_genres: genreId,
+    sort_by: 'popularity.desc',
+    page: String(page),
+  });
+  return tmdbClientFetch<MovieListResponse>(
+    `/discover/movie?${params.toString()}`,
+  );
+}
+
 export async function getSimilarMovies(id: number): Promise<MovieListResponse> {
   return tmdbClientFetch<MovieListResponse>(`/movie/${id}/similar`);
+}
+
+export async function getGenres(): Promise<{
+  genres: { id: number; name: string }[];
+}> {
+  return tmdbClientFetch('/genre/movie/list');
 }

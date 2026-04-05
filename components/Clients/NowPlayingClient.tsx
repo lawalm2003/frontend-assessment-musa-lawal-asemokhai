@@ -8,9 +8,19 @@ import { getImageUrl } from '@/lib/tmdb';
 import { useNowPlayingMovies } from '@/hooks/useTmdb';
 import { formatRating } from '@/lib/utilities';
 import Loading from '@/app/movies/now-playing/loading';
+import { MovieListResponse } from '@/types/movie';
+import { usePathname } from 'next/navigation';
 
-export default function NowPlayingClient({ page }: { page: number }) {
-  const { data, isLoading } = useNowPlayingMovies(page);
+interface Props {
+  page: number;
+  initialData?: MovieListResponse;
+}
+
+export default function NowPlayingClient({ page, initialData }: Props) {
+  const pathname = usePathname();
+  const cleanPath = pathname.replace(/^\/movies/, '') || '/';
+
+  const { data, isLoading } = useNowPlayingMovies(page, initialData);
 
   if (isLoading) return <Loading />;
   if (!data) return null;
@@ -82,7 +92,7 @@ export default function NowPlayingClient({ page }: { page: number }) {
                   </p>
 
                   <Link
-                    href={`/movies/${featured.id}`}
+                    href={`/movies/${featured.id}?from=${cleanPath}`}
                     className='inline-flex items-center gap-2 px-5 py-2 bg-white text-neutral-950 text-sm font-bold rounded-lg hover:bg-neutral-100 transition-colors'
                   >
                     View Details
@@ -139,7 +149,7 @@ export default function NowPlayingClient({ page }: { page: number }) {
                 return (
                   <Link
                     key={movie.id}
-                    href={`/movies/${movie.id}`}
+                    href={`/movies/${movie.id}?from=${cleanPath}`}
                     className='group shrink-0 w-28'
                   >
                     <div className='relative w-28 aspect-[2/3] rounded-xl overflow-hidden bg-neutral-800 mb-2'>
