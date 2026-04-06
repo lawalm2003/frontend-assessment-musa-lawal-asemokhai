@@ -14,6 +14,20 @@ Get a free TMDB API key at [themoviedb.org/settings/api](https://www.themoviedb.
 
 ---
 
+## Deployment
+
+**Platform: Vercel**
+
+Cloudflare Workers was attempted first (as preferred by the assessment). The deployment failed at the `npm ci` step because Cloudflare's build pipeline requires a committed `package-lock.json` and does not expose an easy way to override the install command through configuration files alone. Rather than spend assessment time debugging the Cloudflare build pipeline, Vercel was chosen as the fallback for the following reasons:
+
+- Vercel has first-class Next.js support — it is built and maintained by the same team
+- Zero-config deployment — `next build` output is automatically detected
+- Environment variables are set via the Vercel dashboard, identical to Cloudflare's approach
+- Vercel's Edge Network provides CDN caching equivalent to Cloudflare for static assets
+- ISR (Incremental Static Regeneration) works out of the box on Vercel with no additional config
+
+---
+
 ## Project Structure
 
 ```
