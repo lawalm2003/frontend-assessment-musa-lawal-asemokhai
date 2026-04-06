@@ -53,13 +53,11 @@ export default async function MovieDetailPage({ params }: Props) {
   if (!initialMovie) notFound();
 
   return (
-    <Suspense fallback={<MovieDetailLoading />}>
-      <MovieDetailClient
-        id={numId}
-        initialMovie={initialMovie}
-        initialCredits={initialCredits ?? undefined}
-        initialSimilar={initialSimilar ?? undefined}
-      />
-    </Suspense>
+    <MovieDetailClient
+      id={numId}
+      initialMovie={initialMovie}
+      initialCredits={initialCredits ?? undefined}
+      initialSimilar={initialSimilar ?? undefined}
+    />
   );
 }

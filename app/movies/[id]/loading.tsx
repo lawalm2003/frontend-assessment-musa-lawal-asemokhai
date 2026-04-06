@@ -4,7 +4,7 @@ export default function MovieDetailLoading() {
       <div className='w-full h-72 md:h-96 bg-neutral-800' />
       <div className='max-w-screen-xl mx-auto px-6 py-8'>
         <div className='flex flex-col md:flex-row gap-8 -mt-24 relative z-10'>
-          <div className='shrink-0 w-40 md:w-56 aspect-[2/3] bg-neutral-800 rounded-xl' />
+          <div className='shrink-0 w-40 md:w-56 aspect-2/3 bg-neutral-800 rounded-xl' />
           <div className='flex-1 space-y-4 pt-24 md:pt-0'>
             <div className='h-4 bg-neutral-800 rounded w-1/4' />
             <div className='h-8 bg-neutral-800 rounded w-3/4' />

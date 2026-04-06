@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
 import SearchClient from '@/components/Clients/SearchClient';
 
 export const metadata: Metadata = {
@@ -18,14 +17,5 @@ interface Props {
 export default async function SearchPage({ searchParams }: Props) {
   const { q, page, genre, rating } = await searchParams;
 
-  return (
-    <Suspense>
-      <SearchClient
-        query={q ?? ''}
-        page={Number(page ?? 1)}
-        genre={genre ?? ''}
-        rating={rating ?? ''}
-      />
-    </Suspense>
-  );
+  return <SearchClient query={q ?? ''} page={Number(page ?? 1)} />;
 }

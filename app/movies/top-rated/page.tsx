@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
 import { getTopRatedMovies } from '@/services/tmdb.server';
 import Loading from './loading';
 
@@ -25,9 +24,5 @@ export default async function TopRatedPage({ searchParams }: Props) {
   const page = Number((await searchParams).page ?? 1);
   const initialData = await getTopRatedMovies(page);
 
-  return (
-    <Suspense fallback={<Loading />}>
-      <TopRatedClient page={page} initialData={initialData} />
-    </Suspense>
-  );
+  return <TopRatedClient page={page} initialData={initialData} />;
 }

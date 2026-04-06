@@ -43,9 +43,7 @@ function HomeContent({
       <div className='max-w-screen-xl mx-auto px-6 py-8'>
         {/* Genre filter strip */}
         <div className='mb-10'>
-          <Suspense>
-            <GenreFilter />
-          </Suspense>
+          <GenreFilter />
         </div>
 
         {activeGenre ? (

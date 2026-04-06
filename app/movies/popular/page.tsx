@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
 import { getPopularMovies } from '@/services/tmdb.server';
 import Loading from './loading';
 
@@ -25,9 +24,5 @@ export default async function PopularPage({ searchParams }: Props) {
   const page = Number((await searchParams).page ?? 1);
   const initialData = await getPopularMovies(page);
 
-  return (
-    <Suspense fallback={<Loading />}>
-      <PopularClient page={page} initialData={initialData} />
-    </Suspense>
-  );
+  return <PopularClient page={page} initialData={initialData} />;
 }

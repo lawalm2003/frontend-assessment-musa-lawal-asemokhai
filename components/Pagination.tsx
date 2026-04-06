@@ -16,7 +16,7 @@ export default function Pagination({
   searchQuery,
 }: PaginationProps) {
   const maxPages = Math.min(totalPages, 500);
-  const delta = 2;
+  const delta = 2; //pagination window (currentPage = 10 → show: 8, 9, 10, 11, 12)
 
   const buildHref = (page: number) => {
     const params = new URLSearchParams();

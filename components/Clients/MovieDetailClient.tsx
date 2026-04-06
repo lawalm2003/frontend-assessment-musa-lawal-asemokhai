@@ -43,7 +43,7 @@ export default function MovieDetailClient({
   const releaseYear = movie.release_date
     ? new Date(movie.release_date).getFullYear()
     : null;
-  const topCast = credits?.cast.slice(0, 10) ?? [];
+  const topCast = credits?.cast.slice(0, 15) ?? [];
 
   const routeMap: Record<string, string> = {
     '/': 'Home',
@@ -64,12 +64,11 @@ export default function MovieDetailClient({
             alt={movie.title}
             fill
             priority
-            sizes='100vw'
             className='object-cover object-top'
           />
           <div className='absolute inset-0 bg-gradient-to-b from-transparent via-neutral-950/60 to-neutral-950' />
 
-          {/* Breadcrumb — sits over backdrop */}
+          {/* Breadcrumb navigation */}
           <nav
             aria-label='Breadcrumb'
             className='absolute top-4 left-4 z-10 flex items-center gap-1.5 text-sm text-white/70'
