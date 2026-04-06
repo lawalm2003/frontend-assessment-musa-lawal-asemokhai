@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 
 const navLinks = [
@@ -13,6 +14,10 @@ const navLinks = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
     <header className='sticky top-0 z-50 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-800'>
@@ -25,7 +30,6 @@ export default function Navbar() {
           aria-expanded={menuOpen}
         >
           {menuOpen ? (
-            // X icon
             <svg
               width='20'
               height='20'
@@ -40,7 +44,6 @@ export default function Navbar() {
               <line x1='6' y1='6' x2='18' y2='18' />
             </svg>
           ) : (
-            // Hamburger icon
             <svg
               width='20'
               height='20'
@@ -69,15 +72,23 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className='hidden md:flex items-center gap-1 shrink-0'>
-          {navLinks.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className='px-3 py-1.5 text-sm font-medium text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-md transition-colors'
-            >
-              {label}
-            </Link>
-          ))}
+          {navLinks.map(({ href, label }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                  active
+                    ? 'text-neutral-100 bg-neutral-800'
+                    : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800'
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Search */}
@@ -94,18 +105,26 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       {menuOpen && (
-        <div className='md:hidden border-t absolute w-full border-neutral-800 bg-neutral-950'>
+        <div className='md:hidden border-t border-neutral-800 bg-neutral-950'>
           <div className='max-w-screen-xl mx-auto px-6 py-3 flex flex-col'>
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className='py-3 text-sm font-medium text-neutral-300 hover:text-neutral-100 border-b border-neutral-800 last:border-0 transition-colors'
-              >
-                {label}
-              </Link>
-            ))}
+            {navLinks.map(({ href, label }) => {
+              const active = isActive(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  aria-current={active ? 'page' : undefined}
+                  className={`py-3 text-sm font-medium border-b border-neutral-800 last:border-0 transition-colors ${
+                    active
+                      ? 'text-neutral-100'
+                      : 'text-neutral-400 hover:text-neutral-100'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

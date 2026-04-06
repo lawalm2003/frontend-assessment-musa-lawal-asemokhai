@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
-import PopularClient from '@/components/Clients/PopularClient';
 import { getPopularMovies } from '@/services/tmdb.server';
+import Loading from './loading';
 
 export const metadata: Metadata = {
   title: 'Popular Movies',
@@ -13,15 +14,19 @@ interface Props {
   searchParams: Promise<{ page?: string }>;
 }
 
+const PopularClient = dynamic(
+  () => import('@/components/Clients/PopularClient'),
+  {
+    loading: () => <Loading />,
+  },
+);
+
 export default async function PopularPage({ searchParams }: Props) {
   const page = Number((await searchParams).page ?? 1);
-
-  // SSR prefetch — data is fetched on the server, passed as initialData
-  // to React Query so the page is never blank on first load
   const initialData = await getPopularMovies(page);
 
   return (
-    <Suspense>
+    <Suspense fallback={<Loading />}>
       <PopularClient page={page} initialData={initialData} />
     </Suspense>
   );

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import MovieDetailClient from '@/components/Clients/MovieDetailClient';
 import {
   getMovieDetail,
   getMovieCredits,
@@ -34,12 +34,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const MovieDetailClient = dynamic(
+  () => import('@/components/Clients/MovieDetailClient'),
+  { loading: () => <MovieDetailLoading /> },
+);
+
 export default async function MovieDetailPage({ params }: Props) {
   const { id } = await params;
   const numId = Number(id);
   if (isNaN(numId)) notFound();
 
-  // SSR prefetch all detail data
   const [initialMovie, initialCredits, initialSimilar] = await Promise.all([
     getMovieDetail(numId).catch(() => null),
     getMovieCredits(numId).catch(() => null),
